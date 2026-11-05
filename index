@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>تأكيد الطلب</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;700;900&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: one-column checkout card, 3 steps (order -> code -> done), progress dots, 6-digit OTP input. Single dark theme, WhatsApp green on deep night. */
+:root {
+  --bg: #0b1024;
+  --panel: #141b38;
+  --line: #27305a;
+  --ink: #eef0ff;
+  --muted: #9aa3cf;
+  --wa: #25d366;
+  --wa-dark: #128c7e;
+  --blue: #6b7bff;
+  --lose: #ff5c7a;
+  --display: "Cairo", "Segoe UI", Tahoma, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; }
+body { background: radial-gradient(800px 460px at 50% -8%, rgba(37,211,102,.22) 0%, transparent 62%), var(--bg); color: var(--ink); font-family: var(--display); line-height: 1.6; padding: 20px 16px 40px; }
+.wrap { max-width: 440px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+header { text-align: center; display: flex; flex-direction: column; gap: 4px; }
+.brand { font-family: var(--mono); font-size: 13px; color: var(--muted); }
+.brand b { color: var(--wa); direction: ltr; unicode-bidi: isolate; }
+h1 { margin: 0; font-size: clamp(24px, 6.5vw, 32px); font-weight: 900; }
+.sub { margin: 0; color: var(--muted); font-size: 14px; }
+
+.dots { display: flex; justify-content: center; gap: 8px; }
+.dots i { width: 34px; height: 6px; border-radius: 3px; background: var(--line); transition: background .3s; }
+.dots i.on { background: var(--wa); }
+
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 20px 18px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 30px 60px -30px rgba(0,0,0,.7); }
+.card h2 { margin: 0; font-size: 20px; font-weight: 900; }
+label { display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 700; color: var(--muted); }
+input, select { font: 500 16px var(--display); padding: 12px 14px; border-radius: 10px; border: 1px solid var(--line); background: #0f1530; color: var(--ink); width: 100%; }
+input:focus, select:focus { outline: 2px solid var(--wa); border-color: var(--wa); }
+.btn { appearance: none; border: 0; border-radius: 12px; padding: 15px; font: 900 17px var(--display); cursor: pointer; background: var(--wa); color: #05240f; transition: filter .12s, transform .12s; }
+.btn:hover:not(:disabled) { filter: brightness(1.08); } .btn:active:not(:disabled) { transform: scale(.98); }
+.btn:disabled { opacity: .5; cursor: default; }
+.btn.ghost { background: transparent; border: 1px solid var(--line); color: var(--ink); }
+.err { color: var(--lose); font-size: 14px; min-height: 1.2em; margin: 0; font-weight: 700; }
+
+.otp { display: flex; gap: 7px; justify-content: center; direction: ltr; }
+.otp input { width: 48px; height: 58px; text-align: center; font: 700 24px var(--mono); padding: 0; }
+.done { text-align: center; display: flex; flex-direction: column; gap: 8px; align-items: center; }
+.done .check { width: 72px; height: 72px; border-radius: 50%; background: var(--wa); color: #05240f; display: grid; place-items: center; font-size: 40px; animation: pop .5s cubic-bezier(.2,1.6,.4,1) both; }
+@keyframes pop { from { transform: scale(0); } }
+.summary { background: #0f1530; border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; font-size: 14px; display: flex; flex-direction: column; gap: 4px; width: 100%; }
+.summary div { display: flex; justify-content: space-between; gap: 10px; }
+.summary span:last-child { color: var(--muted); }
+
+.how { background: linear-gradient(135deg, rgba(37,211,102,.14), rgba(107,123,255,.10)); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; }
+.how h2 { margin: 0 0 6px; font-size: 17px; }
+.how p { margin: 0; color: var(--muted); font-size: 14px; }
+
+.contact { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 18px 16px; display: flex; flex-direction: column; gap: 10px; text-align: center; }
+.contact h2 { margin: 0; font-size: 19px; }
+.contact p { margin: 0; color: var(--muted); font-size: 14.5px; }
+.links { display: flex; flex-direction: column; gap: 8px; }
+.links a { display: flex; justify-content: space-between; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); background: #0f1530; border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; font-weight: 700; }
+.links a:hover { border-color: var(--wa); }
+.links a span:last-child { font-family: var(--mono); font-weight: 500; font-size: 13px; color: var(--muted); direction: ltr; }
+footer { text-align: center; color: var(--muted); font-size: 12px; font-family: var(--mono); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand"><b>@smart.way_official</b> · تأكيد الطلبات</div>
+    <h1>أكد الطلب ديالك</h1>
+    <p class="sub">كيوصلك رمز فالواتساب، كتدخلو، وصافي.</p>
+  </header>
+
+  <div class="dots"><i class="on" id="d1"></i><i id="d2"></i><i id="d3"></i></div>
+
+  <!-- STEP 1 -->
+  <div class="card" id="step1">
+    <h2>معلومات الطلب</h2>
+    <label>الاسم<input id="f-name" type="text" placeholder="مثال: محمد" autocomplete="name"></label>
+    <label>المنتوج
+      <select id="f-product">
+        <option>ساعة ذكية — 299 درهم</option>
+        <option>سماعات — 199 درهم</option>
+        <option>عطر — 149 درهم</option>
+      </select>
+    </label>
+    <label>رقم الواتساب<input id="f-phone" type="tel" placeholder="مثال: 0612345678" autocomplete="tel"></label>
+    <p class="err" id="e1"></p>
+    <button class="btn" id="send" type="button">صيفط ليا رمز التأكيد</button>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="card" id="step2" hidden>
+    <h2>دخل الرمز</h2>
+    <p class="sub" id="sent-to"></p>
+    <div class="otp">
+      <input id="o1" inputmode="numeric" maxlength="1" aria-label="1">
+      <input id="o2" inputmode="numeric" maxlength="1" aria-label="2">
+      <input id="o3" inputmode="numeric" maxlength="1" aria-label="3">
+      <input id="o4" inputmode="numeric" maxlength="1" aria-label="4">
+      <input id="o5" inputmode="numeric" maxlength="1" aria-label="5">
+      <input id="o6" inputmode="numeric" maxlength="1" aria-label="6">
+    </div>
+    <p class="err" id="e2"></p>
+    <button class="btn" id="verify" type="button">أكد</button>
+    <button class="btn ghost" id="resend" type="button">عاود صيفط الرمز</button>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="card" id="step3" hidden>
+    <div class="done">
+      <div class="check">✓</div>
+      <h2>الطلب تأكد!</h2>
+      <p class="sub">شكراً، غادي نتواصلو معاك قريباً.</p>
+      <div class="summary" id="summary"></div>
+    </div>
+    <button class="btn ghost" id="restart" type="button">طلب جديد</button>
+  </div>
+
+  <div class="how">
+    <h2>كيفاش كيخدم؟</h2>
+    <p>ساعة ما تدخل رقمك، السيستيم كيولّد رمز، كيصيفطو فالواتساب، وكيتأكد منو. هكا الرقم صحيح 100%، والطلبات الفارغة كيتفلترو.</p>
+  </div>
+
+  <div class="contact">
+    <h2>بغيتي هاد السيستيم فالمتجر ديالك؟</h2>
+    <p>كنصاوب مواقع، متاجر إلكترونية وسيستيمات تسيير.</p>
+    <div class="links">
+      <a href="https://wa.me/212785591656" target="_blank" rel="noopener"><span>واتساب</span><span>+212 7 85 59 16 56</span></a>
+      <a href="https://www.instagram.com/smart.way_official/" target="_blank" rel="noopener"><span>إنستغرام</span><span>@smart.way_official</span></a>
+      <a href="https://walid-laamrani.vercel.app" target="_blank" rel="noopener"><span>السيت ديالي</span><span>walid-laamrani.vercel.app</span></a>
+    </div>
+  </div>
+  <footer>Walid Laamrani · OTP · WhatsApp</footer>
+</div>
+
+<script>
+(function () {
+  // ======== رابط Apps Script ========
+  var BACKEND_URL = "https://script.google.com/macros/s/AKfycbx2C33841CRbwFEu24Vm1N-xyCgc0Kno-Yr7x6jbXG_6TBx_AsMg3qMsSxgM1iMzrlc/exec";
+  // ==================================
+
+  var $ = function (id) { return document.getElementById(id); };
+  var order = {};
+
+  // نداء JSONP (كيتفادى CORS تماماً)
+  function jsonp(params, cb) {
+    var name = 'cb_' + Math.random().toString(36).slice(2);
+    var done = false;
+    var timer = setTimeout(function () { if (!done) { cleanup(); cb(null); } }, 15000);
+    function cleanup() { done = true; clearTimeout(timer); delete window[name]; if (s.parentNode) s.parentNode.removeChild(s); }
+    window[name] = function (res) { cleanup(); cb(res); };
+    var q = Object.keys(params).map(function (k) { return k + '=' + encodeURIComponent(params[k]); }).join('&');
+    var s = document.createElement('script');
+    s.src = BACKEND_URL + '?callback=' + name + '&' + q;
+    s.onerror = function () { if (!done) { cleanup(); cb(null); } };
+    document.body.appendChild(s);
+  }
+
+  function showStep(n) {
+    [1, 2, 3].forEach(function (i) { $('step' + i).hidden = i !== n; $('d' + i).classList.toggle('on', i <= n); });
+  }
+  function cleanPhone(p) { return String(p || '').replace(/\D/g, '').replace(/^0/, '212'); }
+
+  $('send').addEventListener('click', function () {
+    var name = $('f-name').value.trim();
+    var phone = $('f-phone').value.trim();
+    $('e1').textContent = '';
+    if (!name) return $('e1').textContent = 'كتب سميتك عافاك.';
+    if (cleanPhone(phone).length < 11) return $('e1').textContent = 'رقم الواتساب ماشي صحيح.';
+    order = { name: name, product: $('f-product').value, phone: phone, waPhone: cleanPhone(phone) };
+    requestCode();
+  });
+
+  function requestCode() {
+    $('send').disabled = true; $('send').textContent = 'كنصيفطو…';
+    jsonp({ action: 'send', phone: order.waPhone, name: order.name, product: order.product }, function (res) {
+      if (res && res.ok) { afterSend(); }
+      else { $('e1').textContent = 'ما قدرناش نصيفطو الرمز. عاود حاول.'; reset1(); }
+    });
+  }
+  function reset1() { $('send').disabled = false; $('send').textContent = 'صيفط ليا رمز التأكيد'; }
+  function afterSend() {
+    reset1();
+    $('sent-to').textContent = 'صيفطنا الرمز للرقم ' + order.phone;
+    showStep(2); $('o1').focus();
+  }
+
+  var boxes = ['o1', 'o2', 'o3', 'o4', 'o5', 'o6'].map($);
+  boxes.forEach(function (b, i) {
+    b.addEventListener('input', function () {
+      b.value = b.value.replace(/\D/g, '');
+      if (b.value && i < 5) boxes[i + 1].focus();
+    });
+    b.addEventListener('keydown', function (e) { if (e.key === 'Backspace' && !b.value && i > 0) boxes[i - 1].focus(); });
+    b.addEventListener('paste', function (e) {
+      var t = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').slice(0, 6);
+      if (t) { e.preventDefault(); t.split('').forEach(function (d, j) { if (boxes[j]) boxes[j].value = d; }); boxes[Math.min(t.length, 6) - 1].focus(); }
+    });
+  });
+  function typedCode() { return boxes.map(function (b) { return b.value; }).join(''); }
+
+  $('verify').addEventListener('click', function () {
+    var code = typedCode();
+    $('e2').textContent = '';
+    if (code.length < 6) return $('e2').textContent = 'دخل الرمز كامل (6 أرقام).';
+    $('verify').disabled = true; $('verify').textContent = 'كنتأكد…';
+    jsonp({ action: 'verify', phone: order.waPhone, code: code }, function (res) {
+      if (res) finishVerify(res.valid);
+      else { $('e2').textContent = 'مشكل فالاتصال.'; resetV(); }
+    });
+  });
+  function resetV() { $('verify').disabled = false; $('verify').textContent = 'أكد'; }
+  function finishVerify(ok) {
+    resetV();
+    if (!ok) { $('e2').textContent = 'الرمز غالط. عاود حاول.'; boxes.forEach(function (b) { b.value = ''; }); boxes[0].focus(); return; }
+    $('summary').innerHTML = '<div><b>الاسم</b><span>' + order.name + '</span></div>' +
+      '<div><b>المنتوج</b><span>' + order.product + '</span></div>' +
+      '<div><b>الواتساب</b><span>' + order.phone + '</span></div>' +
+      '<div><b>الحالة</b><span style="color:var(--wa)">مؤكد ✅</span></div>';
+    showStep(3);
+  }
+
+  $('resend').addEventListener('click', function () { boxes.forEach(function (b) { b.value = ''; }); $('e2').textContent = ''; requestCode(); });
+  $('restart').addEventListener('click', function () {
+    $('f-name').value = ''; $('f-phone').value = ''; boxes.forEach(function (b) { b.value = ''; });
+    $('e1').textContent = ''; $('e2').textContent = ''; showStep(1);
+  });
+})();
+</script>
+</body>
+</html>
